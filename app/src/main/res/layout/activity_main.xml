@@ -72,6 +72,19 @@
         android:layout_margin="10dp"
         android:background="?android:attr/listDivider" />
 
+    <Button
+        android:id="@+id/btnAdminView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Pocketbase Admin" />
+
+    <View
+        android:id="@+id/divider3"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_margin="10dp"
+        android:background="?android:attr/listDivider" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
