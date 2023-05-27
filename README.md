@@ -60,3 +60,8 @@ PocketbaseMobile.registerNativeBridgeCallback { command, data ->
     "response from native"
 }
 ```
+
+## Screenshot
+
+![](https://github.com/rohitsangwan01/pocketbase_server_android_example/assets/59526499/157f89be-8025-4a45-8ff1-9efc4fd8d4a9)
+
