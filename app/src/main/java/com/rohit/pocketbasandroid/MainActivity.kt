@@ -10,23 +10,27 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.ImageView
+import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.material.textfield.TextInputEditText
+import org.w3c.dom.Text
 import pocketbaseMobile.PocketbaseMobile
 import java.net.Inet4Address
 import java.net.NetworkInterface
 import java.net.SocketException
 
 
-@SuppressLint("SetTextI18n")
+@SuppressLint("SetTextI18n", "UseSwitchCompatOrMaterialCode")
 class MainActivity : AppCompatActivity() {
     private lateinit var txtDetails: TextView
     private lateinit var edtHost: TextInputEditText
     private lateinit var edtPort: TextInputEditText
     private lateinit var sharedPreferences: SharedPreferences
+    private var enablePocketbaseApiLogs = false
     private val notificationPermissionResultCode = 11
     private var hostName = Utils.defaultHostName
     private var port = Utils.defaultPort
@@ -40,9 +44,15 @@ class MainActivity : AppCompatActivity() {
         val btnRun: Button = findViewById(R.id.btnRun)
         val btnStop: Button = findViewById(R.id.btnStop)
         val btnAdminView: Button = findViewById(R.id.btnAdminView)
+        val txtPocketbaseCommunication: TextView = findViewById(R.id.txtPocketbaseCommunication)
+        val btnClearLogs: ImageView = findViewById(R.id.btnClearLogs)
+        val pocketbaseApiLogsSwitch: Switch = findViewById(R.id.pocketbaseApiLogsSwitch)
+
         sharedPreferences = getPreferences(MODE_PRIVATE)
         hostName = sharedPreferences.getString("hostname", getLocalIpAddress()) ?: hostName
         port = sharedPreferences.getString("port", port) ?: port
+
+        txtPocketbaseCommunication.text = "Pocketbase Mobile ( ${PocketbaseMobile.getVersion()} )"
 
         // pass here ip address to access this in other devices under same network
         edtHost.setText(hostName)
@@ -64,16 +74,23 @@ class MainActivity : AppCompatActivity() {
             intent.putExtra("adminUrl", adminUrl)
             startActivity(intent)
         }
+
+        btnClearLogs.setOnClickListener {
+            txtDetails.text = ""
+        }
+
+        enablePocketbaseApiLogs = pocketbaseApiLogsSwitch.isChecked
+        pocketbaseApiLogsSwitch.setOnCheckedChangeListener { _, isChecked ->
+            enablePocketbaseApiLogs = isChecked
+            Toast.makeText(this, "Restart pocketbase to see changes", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun setPocketbaseCallbackListener() {
         PocketbaseMobile.registerNativeBridgeCallback { command, data ->
             Log.e("Test", "PocketbaseLogs :$command : $data \n")
             this.runOnUiThread {
-                var text = "${txtDetails.text} \nCommand: $command \n"
-                if (data != null && data.isNotEmpty()) {
-                    text = "$text \nData: $data \n"
-                }
+                val text = "${txtDetails.text} \n$command: $data \n"
                 txtDetails.text = text
             }
             // return response back to pocketbase
@@ -109,6 +126,7 @@ class MainActivity : AppCompatActivity() {
         intent.putExtra("dataPath", dataPath)
         intent.putExtra("hostname", hostName)
         intent.putExtra("port", port)
+        intent.putExtra("enablePocketbaseApiLogs", enablePocketbaseApiLogs)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(intent)
         } else {

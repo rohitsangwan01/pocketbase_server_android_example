@@ -24,6 +24,7 @@ class PocketbaseService : Service() {
     private var serviceWakeLock = "PocketbaseServiceWakelock"
     private var hostname = Utils.defaultHostName
     private var port = Utils.defaultPort
+    private var enablePocketbaseApiLogs = false
     private val uiScope = CoroutineScope(Dispatchers.Main + Job())
     private var wakeLock: PowerManager.WakeLock? = null
 
@@ -47,6 +48,7 @@ class PocketbaseService : Service() {
             intent?.extras?.getString("dataPath")?.let { dataPath = it }
             intent?.extras?.getString("hostname")?.let { hostname = it }
             intent?.extras?.getString("port")?.let { port = it }
+            enablePocketbaseApiLogs = intent?.extras?.getBoolean("enablePocketbaseApiLogs") ?: false
             startPocketbase(dataPath, hostname, port)
         }
         return super.onStartCommand(intent, flags, startId)
@@ -85,7 +87,7 @@ class PocketbaseService : Service() {
     private fun startPocketbase(dataPath: String, hostname: String, port: String) {
         uiScope.launch {
             withContext(Dispatchers.IO) {
-                PocketbaseMobile.startPocketbase(dataPath, hostname, port)
+                PocketbaseMobile.startPocketbase(dataPath, hostname, port, enablePocketbaseApiLogs)
             }
         }
     }
